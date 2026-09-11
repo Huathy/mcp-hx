@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -29,7 +30,15 @@ func main() {
 		configPath = findConfig()
 	}
 	if configPath == "" {
-		logger.Error("no config file found", "searched", "./mcp-dbx.yaml, ~/.mcp-dbx/config.yaml")
+		logger.Error("未找到配置文件，请先配置 mcp-dbx",
+			"searched",
+			"./mcp-dbx.yaml, ./mcp-dbx.yml, ./.kilo/mcp-dbx.yaml, ./.kilo/mcp-dbx.yml, ~/.mcp-dbx/config.yaml",
+		)
+		fmt.Fprintln(os.Stderr, "\n[提示] 请先创建配置文件，任选其一：")
+		fmt.Fprintln(os.Stderr, "  1. 项目级: ./.kilo/mcp-dbx.yaml  (推荐，仅当前项目)")
+		fmt.Fprintln(os.Stderr, "  2. 项目级: ./mcp-dbx.yaml")
+		fmt.Fprintln(os.Stderr, "  3. 全局级: ~/.mcp-dbx/config.yaml (所有项目共享)")
+		fmt.Fprintln(os.Stderr, "\n示例配置见: examples/mcp-dbx.yaml.example")
 		os.Exit(1)
 	}
 
@@ -71,14 +80,26 @@ func main() {
 }
 
 func findConfig() string {
-	if _, err := os.Stat("./mcp-dbx.yaml"); err == nil {
-		return "./mcp-dbx.yaml"
+	candidates := []string{
+		"./mcp-dbx.yaml",
+		"./mcp-dbx.yml",
+		"./.kilo/mcp-dbx.yaml",
+		"./.kilo/mcp-dbx.yml",
+	}
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
 	}
 	home, err := os.UserHomeDir()
 	if err == nil {
-		p := home + "/.mcp-dbx/config.yaml"
-		if _, err := os.Stat(p); err == nil {
-			return p
+		for _, p := range []string{
+			home + "/.mcp-dbx/config.yaml",
+			home + "/.mcp-dbx/config.yml",
+		} {
+			if _, err := os.Stat(p); err == nil {
+				return p
+			}
 		}
 	}
 	return ""

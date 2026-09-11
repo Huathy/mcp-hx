@@ -203,6 +203,43 @@ docker run -d --name mysql-test -e MYSQL_ROOT_PASSWORD=test -p 3306:3306 mysql:8
 docker run -d --name redis-test -p 6379:6379 redis:7
 ```
 
+## UTF8 多语言读写验证
+
+MySQL DSN 配置 `charset=utf8mb4`，完整支持多语言 UTF8 读写。测试表 `zy_alarm`，字段 `err longtext`。
+
+### 测试数据（id 830-847）
+
+| id | type | ok | err |
+|----|------|----|-----|
+| 830 | threshold | Y | NULL |
+| 831 | timeout | N | connection timed out after 30s |
+| 832 | offline | N | device heartbeat lost |
+| 835 | threshold | N | 温度超过阈值80度 |
+| 836 | offline | N | 设备掉线：心跳超时未收到 |
+| 837 | timeout | N | 网关连接超时：等待30秒无响应 |
+| 840 | threshold | N | 温度がしきい値80度を超えました |
+| 841 | offline | N | デバイスオフライン：ハートビートがタイムアウトしました |
+| 842 | timeout | N | ゲートウェイ接続タイムアウト：30秒応答なし |
+| 843 | threshold | N | 온도가 임계값 80도를 초과했습니다 |
+| 844 | offline | N | 장치 오프라인：하트비트 시간 초과 |
+| 845 | timeout | N | 게이트웨이 연결 시간 초과：30초 응답 없음 |
+| 846 | config | N | 構成エラー：センサーゲインパラメータが不足 |
+| 847 | config | N | 구성 오류：센서 이득 매개변수 누락 |
+
+### 支持的语言
+
+- 英文：`connection timed out after 30s`
+- 中文：`温度超过阈值80度`
+- 日文：`温度がしきい値80度を超えました`
+- 韩文：`온도가 임계값 80도를 초과했습니다`
+- 混合标点：`장치 오프라인：하트비트 시간 초과`（含全角冒号）
+
+### 关键点
+
+- DSN 必须 `charset=utf8mb4`（非 `utf8`，后者只支持 BMP 3 字节，不支持部分 emoji 和生僻字）
+- MySQL 表/列 `COLLATE` 建议用 `utf8mb4_general_ci` 或 `utf8mb4_unicode_ci`
+- MCP JSON-RPC over stdio 天然传输 UTF8，无需额外编码
+
 ## 项目结构
 
 ```
