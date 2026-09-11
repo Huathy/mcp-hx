@@ -1,0 +1,43 @@
+# mcp-dbx configuration example
+
+server:
+  name: "mcp-dbx"
+  version: "0.1.0"
+
+safety:
+  mode: "read-write"
+  max_rows: 1000
+  query_timeout: 30s
+  blocked_keywords:
+    - "DROP"
+    - "TRUNCATE"
+    - "GRANT"
+    - "REVOKE"
+    - "ALTER"
+  allow_blocked_keywords: []
+  blocked_commands:
+    - "FLUSHALL"
+    - "FLUSHDB"
+    - "CONFIG"
+    - "SHUTDOWN"
+    - "KEYS"
+  allow_blocked_commands: []
+
+datasources:
+  - name: "main-mysql"
+    driver: "mysql"
+    dsn: "user:password@tcp(127.0.0.1:3306)/mydb?charset=utf8mb4&parseTime=true"
+    max_open_conns: 10
+    max_idle_conns: 5
+    conn_max_lifetime: 5m
+    safety:
+      mode: "read-only"
+
+  - name: "cache-redis"
+    driver: "redis"
+    addr: "127.0.0.1:6379"
+    password: ""
+    db: 0
+    pool_size: 10
+    safety:
+      mode: "read-write"
