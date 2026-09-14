@@ -148,8 +148,8 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ### 配置文件查找顺序
 
 1. `--config <path>` 命令行指定
-2. `./mcp-dbx.yaml` 当前目录
-3. `~/.mcp-dbx/config.yaml` 用户目录
+2. `./.kilo/mcp_x.yaml` 项目 .kilo 目录（推荐）
+3. `~/.config/mcp_x/config.yaml` 用户全局目录
 
 ### 安全策略优先级
 
