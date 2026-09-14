@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	Server      ServerConfig     `yaml:"server"`
-	Safety      SafetyConfig     `yaml:"safety"`
+	Server      ServerConfig       `yaml:"server"`
+	Safety      SafetyConfig       `yaml:"safety"`
 	DataSources []DataSourceConfig `yaml:"datasources"`
 }
 
@@ -20,29 +20,39 @@ type ServerConfig struct {
 }
 
 type SafetyConfig struct {
-	Mode                 string        `yaml:"mode"`
-	MaxRows              int           `yaml:"max_rows"`
-	QueryTimeout         Duration      `yaml:"query_timeout"`
-	BlockedKeywords      []string      `yaml:"blocked_keywords"`
-	AllowBlockedKeywords []string      `yaml:"allow_blocked_keywords"`
-	BlockedCommands     []string      `yaml:"blocked_commands"`
-	AllowBlockedCommands []string     `yaml:"allow_blocked_commands"`
+	Mode                 string   `yaml:"mode"`
+	MaxRows              int      `yaml:"max_rows"`
+	QueryTimeout         Duration `yaml:"query_timeout"`
+	BlockedKeywords      []string `yaml:"blocked_keywords"`
+	AllowBlockedKeywords []string `yaml:"allow_blocked_keywords"`
+	BlockedCommands      []string `yaml:"blocked_commands"`
+	AllowBlockedCommands []string `yaml:"allow_blocked_commands"`
 }
 
 type DataSourceConfig struct {
-	Name           string            `yaml:"name"`
-	Driver         string            `yaml:"driver"`
-	DSN            string            `yaml:"dsn"`
-	MaxOpenConns   int               `yaml:"max_open_conns"`
-	MaxIdleConns   int               `yaml:"max_idle_conns"`
-	ConnMaxLifetime Duration         `yaml:"conn_max_lifetime"`
-	Addr           string            `yaml:"addr"`
-	Addrs          []string          `yaml:"addrs"`
-	Password       string            `yaml:"password"`
-	DB             int               `yaml:"db"`
-	Mode           string            `yaml:"mode"`
-	PoolSize       int               `yaml:"pool_size"`
-	Safety         *SafetyConfig     `yaml:"safety"`
+	Name            string        `yaml:"name"`
+	Driver          string        `yaml:"driver"`
+	DSN             string        `yaml:"dsn"`
+	MaxOpenConns    int           `yaml:"max_open_conns"`
+	MaxIdleConns    int           `yaml:"max_idle_conns"`
+	ConnMaxLifetime Duration      `yaml:"conn_max_lifetime"`
+	Addr            string        `yaml:"addr"`
+	Addrs           []string      `yaml:"addrs"`
+	Password        string        `yaml:"password"`
+	DB              int           `yaml:"db"`
+	Mode            string        `yaml:"mode"`
+	PoolSize        int           `yaml:"pool_size"`
+	Safety          *SafetyConfig `yaml:"safety"`
+	Username        string        `yaml:"username"`
+	Endpoint        string        `yaml:"endpoint"`
+	Endpoints       []string      `yaml:"endpoints"`
+	AccessKey       string        `yaml:"access_key"`
+	SecretKey       string        `yaml:"secret_key"`
+	UseSSL          bool          `yaml:"use_ssl"`
+	Region          string        `yaml:"region"`
+	Bucket          string        `yaml:"bucket"`
+	IndexName       string        `yaml:"index_name"`
+	Database        string        `yaml:"database"`
 }
 
 type Duration time.Duration

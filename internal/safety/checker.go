@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/yourname/mcp-dbx/internal/config"
+	"github.com/yourname/mcp-x/internal/config"
 )
 
 type Checker struct {

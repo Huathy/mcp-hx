@@ -10,16 +10,26 @@ const (
 )
 
 type ConnConfig struct {
-	DSN            string
-	MaxOpenConns   int
-	MaxIdleConns   int
+	DSN             string
+	MaxOpenConns    int
+	MaxIdleConns    int
 	ConnMaxLifetime int64
-	Addr           string
-	Addrs          []string
-	Password       string
-	DB             int
-	Mode           string
-	PoolSize       int
+	Addr            string
+	Addrs           []string
+	Password        string
+	DB              int
+	Mode            string
+	PoolSize        int
+	Username        string
+	Endpoint        string
+	Endpoints       []string
+	AccessKey       string
+	SecretKey       string
+	UseSSL          bool
+	Region          string
+	Bucket          string
+	IndexName       string
+	Database        string
 }
 
 type QueryResult struct {
@@ -38,9 +48,9 @@ type TableInfo struct {
 }
 
 type TableSchema struct {
-	Table    string
-	Columns  []ColumnInfo
-	Indexes  []IndexInfo
+	Table   string
+	Columns []ColumnInfo
+	Indexes []IndexInfo
 }
 
 type ColumnInfo struct {
@@ -88,6 +98,49 @@ type AnyDriver interface {
 	Name() string
 	Type() DriverType
 	Connect(ctx context.Context, cfg ConnConfig) error
+	Ping(ctx context.Context) error
+	Close() error
+}
+
+type DocInfo struct {
+	ID     string
+	Source map[string]any
+}
+
+type DocStoreDriver interface {
+	Name() string
+	Type() DriverType
+	Connect(ctx context.Context, cfg ConnConfig) error
+	ListIndices(ctx context.Context) ([]string, error)
+	Search(ctx context.Context, index, query string, limit int) ([]DocInfo, error)
+	GetDoc(ctx context.Context, index, id string) (*DocInfo, error)
+	IndexDoc(ctx context.Context, index, id, body string) error
+	DeleteDoc(ctx context.Context, index, id string) error
+	Ping(ctx context.Context) error
+	Close() error
+}
+
+type BucketInfo struct {
+	Name        string
+	ObjectCount int64
+}
+
+type ObjectInfo struct {
+	Key          string
+	Size         int64
+	ContentType  string
+	LastModified string
+}
+
+type ObjectStoreDriver interface {
+	Name() string
+	Type() DriverType
+	Connect(ctx context.Context, cfg ConnConfig) error
+	ListBuckets(ctx context.Context) ([]BucketInfo, error)
+	ListObjects(ctx context.Context, bucket, prefix string, limit int) ([]ObjectInfo, error)
+	GetObject(ctx context.Context, bucket, key string) (string, error)
+	PutObject(ctx context.Context, bucket, key, contentType string, body []byte) error
+	DeleteObject(ctx context.Context, bucket, key string) error
 	Ping(ctx context.Context) error
 	Close() error
 }

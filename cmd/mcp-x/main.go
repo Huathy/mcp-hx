@@ -9,17 +9,23 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yourname/mcp-dbx/internal/config"
-	"github.com/yourname/mcp-dbx/internal/datasource"
-	mcpserver "github.com/yourname/mcp-dbx/internal/mcp"
+	"github.com/yourname/mcp-x/internal/config"
+	"github.com/yourname/mcp-x/internal/datasource"
+	mcpserver "github.com/yourname/mcp-x/internal/mcp"
 
-	_ "github.com/yourname/mcp-dbx/internal/driver/mysql"
-	_ "github.com/yourname/mcp-dbx/internal/driver/redis"
+	_ "github.com/yourname/mcp-x/internal/driver/dameng"
+	_ "github.com/yourname/mcp-x/internal/driver/elasticsearch"
+	_ "github.com/yourname/mcp-x/internal/driver/kingbase"
+	_ "github.com/yourname/mcp-x/internal/driver/minio"
+	_ "github.com/yourname/mcp-x/internal/driver/mongodb"
+	_ "github.com/yourname/mcp-x/internal/driver/mysql"
+	_ "github.com/yourname/mcp-x/internal/driver/postgres"
+	_ "github.com/yourname/mcp-x/internal/driver/redis"
 )
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "config", "", "path to config file (default: ./mcp-dbx.yaml)")
+	flag.StringVar(&configPath, "config", "", "path to config file (default: ./.kilo/mcp-x.yaml)")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
@@ -32,12 +38,12 @@ func main() {
 	if configPath == "" {
 		logger.Error("未找到配置文件，请先配置 mcp_x",
 			"searched",
-			"./.kilo/mcp_x.yaml, ./.kilo/mcp_x.yml, ~/.config/mcp_x/config.yaml, ~/.config/mcp_x/config.yml",
+			"./.kilo/mcp-x.yaml, ./.kilo/mcp-x.yml, ~/.config/mcp_x/config.yaml, ~/.config/mcp_x/config.yml",
 		)
 		fmt.Fprintln(os.Stderr, "\n[提示] 请先创建配置文件，任选其一：")
-		fmt.Fprintln(os.Stderr, "  1. 项目级: ./.kilo/mcp_x.yaml  (推荐，仅当前项目)")
+		fmt.Fprintln(os.Stderr, "  1. 项目级: ./.kilo/mcp-x.yaml  (推荐，仅当前项目)")
 		fmt.Fprintln(os.Stderr, "  2. 全局级: ~/.config/mcp_x/config.yaml (所有项目共享)")
-		fmt.Fprintln(os.Stderr, "\n示例配置见: examples/mcp_x.yaml.example")
+		fmt.Fprintln(os.Stderr, "\n示例配置见: examples/mcp-x.yaml.example")
 		os.Exit(1)
 	}
 
@@ -80,8 +86,8 @@ func main() {
 
 func findConfig() string {
 	candidates := []string{
-		"./.kilo/mcp_x.yaml",
-		"./.kilo/mcp_x.yml",
+		"./.kilo/mcp-x.yaml",
+		"./.kilo/mcp-x.yml",
 	}
 	for _, p := range candidates {
 		if _, err := os.Stat(p); err == nil {

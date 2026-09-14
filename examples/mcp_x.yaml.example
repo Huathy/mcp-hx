@@ -1,7 +1,7 @@
-# mcp-dbx configuration example
+# mcp-x configuration example
 
 server:
-  name: "mcp-dbx"
+  name: "mcp-x"
   version: "0.1.0"
 
 safety:
@@ -39,5 +39,62 @@ datasources:
     password: ""
     db: 0
     pool_size: 10
+    safety:
+      mode: "read-write"
+
+  - name: "main-postgres"
+    driver: "postgres"
+    dsn: "postgres://user:password@127.0.0.1:5432/mydb?sslmode=disable"
+    max_open_conns: 10
+    max_idle_conns: 5
+    conn_max_lifetime: 5m
+    safety:
+      mode: "read-only"
+
+  - name: "main-kingbase"
+    driver: "kingbase"
+    dsn: "postgres://system:123456@127.0.0.1:54321/test?sslmode=disable"
+    max_open_conns: 10
+    max_idle_conns: 5
+    conn_max_lifetime: 5m
+    safety:
+      mode: "read-only"
+
+  - name: "main-dameng"
+    driver: "dameng"
+    dsn: "dm://SYSDBA:SYSDBA@127.0.0.1:5236?autoCommit=true"
+    max_open_conns: 10
+    max_idle_conns: 5
+    conn_max_lifetime: 5m
+    safety:
+      mode: "read-only"
+
+  - name: "main-mongo"
+    driver: "mongodb"
+    dsn: "mongodb://user:password@127.0.0.1:27017/mydb"
+    database: "mydb"
+    bucket: "documents"
+    pool_size: 10
+    safety:
+      mode: "read-write"
+
+  - name: "main-es"
+    driver: "elasticsearch"
+    addrs:
+      - "http://127.0.0.1:9200"
+    username: ""
+    password: ""
+    index_name: "my-index"
+    safety:
+      mode: "read-write"
+
+  - name: "main-minio"
+    driver: "minio"
+    endpoint: "127.0.0.1:9000"
+    access_key: "minioadmin"
+    secret_key: "minioadmin"
+    use_ssl: false
+    region: "us-east-1"
+    bucket: "mcp-x"
     safety:
       mode: "read-write"

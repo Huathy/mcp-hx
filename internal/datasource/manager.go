@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/yourname/mcp-dbx/internal/config"
-	"github.com/yourname/mcp-dbx/internal/driver"
+	"github.com/yourname/mcp-x/internal/config"
+	"github.com/yourname/mcp-x/internal/driver"
 )
 
 type Manager struct {
@@ -29,16 +29,26 @@ func NewManager(cfgs []config.DataSourceConfig, logger *slog.Logger) (*Manager, 
 			return nil, fmt.Errorf("datasource %s: %w", dc.Name, err)
 		}
 		connCfg := driver.ConnConfig{
-			DSN:            dc.DSN,
-			MaxOpenConns:   dc.MaxOpenConns,
-			MaxIdleConns:   dc.MaxIdleConns,
+			DSN:             dc.DSN,
+			MaxOpenConns:    dc.MaxOpenConns,
+			MaxIdleConns:    dc.MaxIdleConns,
 			ConnMaxLifetime: int64(dc.ConnMaxLifetime.Std()),
-			Addr:           dc.Addr,
-			Addrs:          dc.Addrs,
-			Password:       dc.Password,
-			DB:             dc.DB,
-			Mode:           dc.Mode,
-			PoolSize:       dc.PoolSize,
+			Addr:            dc.Addr,
+			Addrs:           dc.Addrs,
+			Password:        dc.Password,
+			DB:              dc.DB,
+			Mode:            dc.Mode,
+			PoolSize:        dc.PoolSize,
+			Username:        dc.Username,
+			Endpoint:        dc.Endpoint,
+			Endpoints:       dc.Endpoints,
+			AccessKey:       dc.AccessKey,
+			SecretKey:       dc.SecretKey,
+			UseSSL:          dc.UseSSL,
+			Region:          dc.Region,
+			Bucket:          dc.Bucket,
+			IndexName:       dc.IndexName,
+			Database:        dc.Database,
 		}
 		if err := d.Connect(ctx, connCfg); err != nil {
 			return nil, fmt.Errorf("connect datasource %s: %w", dc.Name, err)

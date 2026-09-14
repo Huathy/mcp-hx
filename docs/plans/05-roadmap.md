@@ -1,67 +1,55 @@
-# 05 开发计划
-
-## 1. 里程碑概览
-
-| 阶段 | 目标 | 预估工时 |
+# 05 寮€鍙戣鍒?
+## 1. 閲岀▼纰戞瑙?
+| 闃舵 | 鐩爣 | 棰勪及宸ユ椂 |
 |------|------|---------|
-| M1: 骨架 | 项目初始化 + 配置层 + Driver 接口 | 1-2 天 |
-| M2: MySQL | MySQL Driver + SQL 工具 | 2-3 天 |
-| M3: Redis | Redis Driver + Redis 工具 | 2 天 |
-| M4: 安全层 | 读写分离 + 危险词拦截 | 1-2 天 |
-| M5: 集成测试 | kilocode/cursor 联调 | 1 天 |
-| M6: 国产数据库 | 达梦/OceanBase 扩展 | 2-3 天 |
+| M1: 楠ㄦ灦 | 椤圭洰鍒濆鍖?+ 閰嶇疆灞?+ Driver 鎺ュ彛 | 1-2 澶?|
+| M2: MySQL | MySQL Driver + SQL 宸ュ叿 | 2-3 澶?|
+| M3: Redis | Redis Driver + Redis 宸ュ叿 | 2 澶?|
+| M4: 瀹夊叏灞?| 璇诲啓鍒嗙 + 鍗遍櫓璇嶆嫤鎴?| 1-2 澶?|
+| M5: 闆嗘垚娴嬭瘯 | kilocode/cursor 鑱旇皟 | 1 澶?|
+| M6: 鍥戒骇鏁版嵁搴?| 杈炬ⅵ/OceanBase 鎵╁睍 | 2-3 澶?|
 
-总计约 9-13 天（业余开发节奏）。
+鎬昏绾?9-13 澶╋紙涓氫綑寮€鍙戣妭濂忥級銆?
+## 2. M1: 椤圭洰楠ㄦ灦
 
-## 2. M1: 项目骨架
-
-### 2.1 初始化
-
+### 2.1 鍒濆鍖?
 ```bash
 cd D:\works\mystudy\my_open\mcp_dbx
-go mod init github.com/yourname/mcp-dbx
+go mod init github.com/yourname/mcp-x
 go get github.com/modelcontextprotocol/go-sdk/mcp
 go get gopkg.in/yaml.v3
 ```
 
-### 2.2 交付物
-
-- [ ] `go.mod` 初始化
-- [ ] `internal/config/config.go` — YAML 配置解析
-- [ ] `internal/driver/driver.go` — Driver 接口定义
-- [ ] `internal/driver/registry.go` — 驱动注册表
-- [ ] `internal/datasource/manager.go` — 数据源管理器
-- [ ] `internal/mcp/server.go` — MCP server 骨架（空工具）
-- [ ] `cmd/mcp-dbx/main.go` — 入口，加载配置启动 server
-- [ ] `examples/mcp-dbx.yaml.example` — 配置示例
-- [ ] 能启动 stdio server，响应 `tools/list`（返回空列表）
-
-### 2.3 验证
+### 2.2 浜や粯鐗?
+- [ ] `go.mod` 鍒濆鍖?- [ ] `internal/config/config.go` 鈥?YAML 閰嶇疆瑙ｆ瀽
+- [ ] `internal/driver/driver.go` 鈥?Driver 鎺ュ彛瀹氫箟
+- [ ] `internal/driver/registry.go` 鈥?椹卞姩娉ㄥ唽琛?- [ ] `internal/datasource/manager.go` 鈥?鏁版嵁婧愮鐞嗗櫒
+- [ ] `internal/mcp/server.go` 鈥?MCP server 楠ㄦ灦锛堢┖宸ュ叿锛?- [ ] `cmd/mcp-x/main.go` 鈥?鍏ュ彛锛屽姞杞介厤缃惎鍔?server
+- [ ] `examples/mcp-x.yaml.example` 鈥?閰嶇疆绀轰緥
+- [ ] 鑳藉惎鍔?stdio server锛屽搷搴?`tools/list`锛堣繑鍥炵┖鍒楄〃锛?
+### 2.3 楠岃瘉
 
 ```powershell
-# 构建
-go build -o bin\mcp-dbx.exe .\cmd\mcp-dbx
+# 鏋勫缓
+go build -o bin\mcp-x.exe .\cmd\mcp-x
 
-# 启动测试（手动发 JSON-RPC）
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | .\bin\mcp-dbx.exe --config .\examples\mcp-dbx.yaml.example
+# 鍚姩娴嬭瘯锛堟墜鍔ㄥ彂 JSON-RPC锛?echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | .\bin\mcp-x.exe --config .\examples\mcp-x.yaml.example
 ```
 
-## 3. M2: MySQL Driver + SQL 工具
+## 3. M2: MySQL Driver + SQL 宸ュ叿
 
-### 3.1 依赖
+### 3.1 渚濊禆
 
 ```bash
 go get github.com/go-sql-driver/mysql
 ```
 
-### 3.2 交付物
-
-- [ ] `internal/driver/mysql/mysql.go` — 实现 Driver 接口
-- [ ] `internal/mcp/tools.go` — 注册 `db_list`, `db_ping`, `db_query`, `db_execute`, `db_tables`, `db_schema`
-- [ ] `internal/mcp/tools_sql.go` — SQL 工具 handler
-- [ ] 单元测试：`internal/driver/mysql/mysql_test.go`（用 SQLite 或内存库 mock，或跳过集成测试）
-
-### 3.3 MySQL Driver 实现要点
+### 3.2 浜や粯鐗?
+- [ ] `internal/driver/mysql/mysql.go` 鈥?瀹炵幇 Driver 鎺ュ彛
+- [ ] `internal/mcp/tools.go` 鈥?娉ㄥ唽 `db_list`, `db_ping`, `db_query`, `db_execute`, `db_tables`, `db_schema`
+- [ ] `internal/mcp/tools_sql.go` 鈥?SQL 宸ュ叿 handler
+- [ ] 鍗曞厓娴嬭瘯锛歚internal/driver/mysql/mysql_test.go`锛堢敤 SQLite 鎴栧唴瀛樺簱 mock锛屾垨璺宠繃闆嗘垚娴嬭瘯锛?
+### 3.3 MySQL Driver 瀹炵幇瑕佺偣
 
 ```go
 type MySQLDriver struct {
@@ -70,8 +58,7 @@ type MySQLDriver struct {
 
 func (d *MySQLDriver) Connect(ctx context.Context, cfg ConnConfig) error {
     db, err := sql.Open("mysql", cfg.DSN)
-    // 设置连接池参数
-    db.SetMaxOpenConns(cfg.MaxOpenConns)
+    // 璁剧疆杩炴帴姹犲弬鏁?    db.SetMaxOpenConns(cfg.MaxOpenConns)
     db.SetMaxIdleConns(cfg.MaxIdleConns)
     db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
     d.db = db
@@ -81,41 +68,39 @@ func (d *MySQLDriver) Connect(ctx context.Context, cfg ConnConfig) error {
 func (d *MySQLDriver) Query(ctx context.Context, sqlStr string, args []any) (*QueryResult, error) {
     rows, err := d.db.QueryContext(ctx, sqlStr, args...)
     // ...
-    // 读取列名
+    // 璇诲彇鍒楀悕
     cols, _ := rows.Columns()
-    // 逐行扫描，interface{} + []byte 处理
-    // 返回 QueryResult{Columns, Rows}
+    // 閫愯鎵弿锛宨nterface{} + []byte 澶勭悊
+    // 杩斿洖 QueryResult{Columns, Rows}
 }
 
 func (d *MySQLDriver) ListTables(ctx context.Context) ([]TableInfo, error) {
     return d.Query(ctx, "SHOW TABLES", nil)
-    // 或用 information_schema 更通用
+    // 鎴栫敤 information_schema 鏇撮€氱敤
 }
 ```
 
-### 3.4 验证
+### 3.4 楠岃瘉
 
-配置真实 MySQL 连接，通过 MCP inspector 或手动 JSON-RPC 调用 `db_query` 执行 `SELECT 1`。
-
+閰嶇疆鐪熷疄 MySQL 杩炴帴锛岄€氳繃 MCP inspector 鎴栨墜鍔?JSON-RPC 璋冪敤 `db_query` 鎵ц `SELECT 1`銆?
 ## 4. M3: Redis Driver
 
-### 4.1 依赖
+### 4.1 渚濊禆
 
 ```bash
 go get github.com/redis/go-redis/v9
 ```
 
-### 4.2 交付物
+### 4.2 浜や粯鐗?
+- [ ] `internal/driver/redis/redis.go` 鈥?瀹炵幇 NoSQLDriver 鎺ュ彛
+- [ ] `internal/mcp/tools_redis.go` 鈥?娉ㄥ唽 `redis_get/set/del/keys/type/ttl`
+- [ ] 鍗曞厓娴嬭瘯
 
-- [ ] `internal/driver/redis/redis.go` — 实现 NoSQLDriver 接口
-- [ ] `internal/mcp/tools_redis.go` — 注册 `redis_get/set/del/keys/type/ttl`
-- [ ] 单元测试
-
-### 4.3 Redis Driver 要点
+### 4.3 Redis Driver 瑕佺偣
 
 ```go
 type RedisDriver struct {
-    client redis.UniversalClient  // 兼容单机/集群
+    client redis.UniversalClient  // 鍏煎鍗曟満/闆嗙兢
 }
 
 func (d *RedisDriver) Connect(ctx context.Context, cfg ConnConfig) error {
@@ -137,85 +122,68 @@ func (d *RedisDriver) Connect(ctx context.Context, cfg ConnConfig) error {
 }
 ```
 
-## 5. M4: 安全层
-
-### 5.1 交付物
-
-- [ ] `internal/safety/checker.go` — 读写模式检查
-- [ ] `internal/safety/interceptor.go` — 危险词拦截
-- [ ] `internal/safety/limiter.go` — 行数/超时限制
-- [ ] `internal/safety/delete_check.go` — DELETE/UPDATE 无 WHERE 检测
-- [ ] 集成到工具 handler 调用链
-
-### 5.2 调用链
-
+## 5. M4: 瀹夊叏灞?
+### 5.1 浜や粯鐗?
+- [ ] `internal/safety/checker.go` 鈥?璇诲啓妯″紡妫€鏌?- [ ] `internal/safety/interceptor.go` 鈥?鍗遍櫓璇嶆嫤鎴?- [ ] `internal/safety/limiter.go` 鈥?琛屾暟/瓒呮椂闄愬埗
+- [ ] `internal/safety/delete_check.go` 鈥?DELETE/UPDATE 鏃?WHERE 妫€娴?- [ ] 闆嗘垚鍒板伐鍏?handler 璋冪敤閾?
+### 5.2 璋冪敤閾?
 ```
 tool handler
-  → safety.CheckMode(datasource, isWrite)
-  → safety.CheckSQL(sql) 或 safety.CheckRedisCommand(cmd)
-  → safety.CheckDeleteWhere(sql)
-  → driver.Query/Execute(ctxWithTimeout, sql, args)
+  鈫?safety.CheckMode(datasource, isWrite)
+  鈫?safety.CheckSQL(sql) 鎴?safety.CheckRedisCommand(cmd)
+  鈫?safety.CheckDeleteWhere(sql)
+  鈫?driver.Query/Execute(ctxWithTimeout, sql, args)
 ```
 
-## 6. M5: 集成测试
+## 6. M5: 闆嗘垚娴嬭瘯
 
-### 6.1 交付物
+### 6.1 浜や粯鐗?
+- [ ] 閰嶇疆 kilocode `.kilocode/mcp.json`
+- [ ] 閰嶇疆 cursor `.cursor/mcp.json`
+- [ ] 绔埌绔祴璇曪細AI 璋冪敤 `db_query` 鏌ヨ 鈫?杩斿洖琛ㄦ牸
+- [ ] 绔埌绔祴璇曪細AI 璋冪敤 `redis_set` 鈫?`redis_get` 楠岃瘉
+- [ ] 瀹夊叏鎷︽埅娴嬭瘯锛歳ead-only 妯″紡涓?`db_execute` 琚嫆
+- [ ] 鍗遍櫓璇嶆祴璇曪細`DROP TABLE` 琚嫤鎴?
+### 6.2 娴嬭瘯鐜
 
-- [ ] 配置 kilocode `.kilocode/mcp.json`
-- [ ] 配置 cursor `.cursor/mcp.json`
-- [ ] 端到端测试：AI 调用 `db_query` 查询 → 返回表格
-- [ ] 端到端测试：AI 调用 `redis_set` → `redis_get` 验证
-- [ ] 安全拦截测试：read-only 模式下 `db_execute` 被拒
-- [ ] 危险词测试：`DROP TABLE` 被拦截
-
-### 6.2 测试环境
-
-本地 Docker 起 MySQL + Redis：
-
+鏈湴 Docker 璧?MySQL + Redis锛?
 ```powershell
 docker run -d --name mysql-test -e MYSQL_ROOT_PASSWORD=test -p 3306:3306 mysql:8
 docker run -d --name redis-test -p 6379:6379 redis:7
 ```
 
-## 7. M6: 国产数据库扩展
+## 7. M6: 鍥戒骇鏁版嵁搴撴墿灞?
+### 7.1 OceanBase锛堟渶绠€鍗曪級
 
-### 7.1 OceanBase（最简单）
-
-OceanBase 兼容 MySQL 协议，直接复用 MySQL 驱动：
-
+OceanBase 鍏煎 MySQL 鍗忚锛岀洿鎺ュ鐢?MySQL 椹卞姩锛?
 ```go
 // internal/driver/oceanbase/oceanbase.go
-// 实质是 MySQLDriver 的别名包装
-type OceanBaseDriver struct {
+// 瀹炶川鏄?MySQLDriver 鐨勫埆鍚嶅寘瑁?type OceanBaseDriver struct {
     MySQLDriver
 }
 
 func (d *OceanBaseDriver) Name() string { return "oceanbase" }
 ```
 
-或更简单：在 driver registry 中把 `oceanbase` 映射到 MySQLDriver 实例。
+鎴栨洿绠€鍗曪細鍦?driver registry 涓妸 `oceanbase` 鏄犲皠鍒?MySQLDriver 瀹炰緥銆?
+### 7.2 杈炬ⅵ DM8
 
-### 7.2 达梦 DM8
-
-需要达梦官方 Go 驱动：
-
+闇€瑕佽揪姊﹀畼鏂?Go 椹卞姩锛?
 ```go
-import "dameng.com/dm"  // 从安装包 drivers/go 获取
+import "dameng.com/dm"  // 浠庡畨瑁呭寘 drivers/go 鑾峰彇
 
-// 实现标准 database/sql 接口
+// 瀹炵幇鏍囧噯 database/sql 鎺ュ彛
 ```
 
-**挑战**：达梦驱动不在公共 Go module proxy，需要：
-- 方案 A：把驱动源码 vendor 到 `vendor/dameng/`
-- 方案 B：用 `gorm-dameng`（社区封装，在 GitHub）
+**鎸戞垬**锛氳揪姊﹂┍鍔ㄤ笉鍦ㄥ叕鍏?Go module proxy锛岄渶瑕侊細
+- 鏂规 A锛氭妸椹卞姩婧愮爜 vendor 鍒?`vendor/dameng/`
+- 鏂规 B锛氱敤 `gorm-dameng`锛堢ぞ鍖哄皝瑁咃紝鍦?GitHub锛?
+### 7.3 閲戜粨 Kingbase
 
-### 7.3 金仓 Kingbase
-
-Kingbase 兼容 PostgreSQL 协议：
-
+Kingbase 鍏煎 PostgreSQL 鍗忚锛?
 ```go
-import _ "github.com/lib/pq"  // 或 github.com/jackc/pgx/v5/stdlib
-// DSN 用 postgres:// 格式
+import _ "github.com/lib/pq"  // 鎴?github.com/jackc/pgx/v5/stdlib
+// DSN 鐢?postgres:// 鏍煎紡
 ```
 
 ## 8. Makefile
@@ -224,10 +192,10 @@ import _ "github.com/lib/pq"  // 或 github.com/jackc/pgx/v5/stdlib
 .PHONY: build test run clean
 
 build:
-	go build -o bin/mcp-dbx ./cmd/mcp-dbx
+	go build -o bin/mcp-x ./cmd/mcp-x
 
 run: build
-	./bin/mcp-dbx --config ./examples/mcp-dbx.yaml.example
+	./bin/mcp-x --config ./examples/mcp-x.yaml.example
 
 test:
 	go test ./... -v
@@ -236,31 +204,30 @@ clean:
 	rm -rf bin/
 ```
 
-## 9. 发布
+## 9. 鍙戝竷
 
-### 9.1 跨平台构建
-
+### 9.1 璺ㄥ钩鍙版瀯寤?
 ```powershell
 # Windows
-$env:GOOS="windows"; $env:GOARCH="amd64"; go build -o bin/mcp-dbx-windows-amd64.exe ./cmd/mcp-dbx
+$env:GOOS="windows"; $env:GOARCH="amd64"; go build -o bin/mcp-x-windows-amd64.exe ./cmd/mcp-x
 # Linux
-$env:GOOS="linux"; $env:GOARCH="amd64"; go build -o bin/mcp-dbx-linux-amd64 ./cmd/mcp-dbx
+$env:GOOS="linux"; $env:GOARCH="amd64"; go build -o bin/mcp-x-linux-amd64 ./cmd/mcp-x
 # macOS
-$env:GOOS="darwin"; $env:GOARCH="arm64"; go build -o bin/mcp-dbx-darwin-arm64 ./cmd/mcp-dbx
+$env:GOOS="darwin"; $env:GOARCH="arm64"; go build -o bin/mcp-x-darwin-arm64 ./cmd/mcp-x
 ```
 
 ### 9.2 GitHub Release
 
-- 打 tag `v0.1.0`
-- GitHub Actions 自动构建三平台二进制
-- Release 附带配置示例和 kilocode 接入说明
+- 鎵?tag `v0.1.0`
+- GitHub Actions 鑷姩鏋勫缓涓夊钩鍙颁簩杩涘埗
+- Release 闄勫甫閰嶇疆绀轰緥鍜?kilocode 鎺ュ叆璇存槑
 
-## 10. 版本规划
+## 10. 鐗堟湰瑙勫垝
 
-| 版本 | 内容 |
+| 鐗堟湰 | 鍐呭 |
 |------|------|
-| v0.1.0 | MySQL + Redis + 基础安全层，stdio 传输 |
-| v0.2.0 | OceanBase + 金仓支持，审计日志 |
-| v0.3.0 | 达梦 DM8 支持 |
-| v0.4.0 | HTTP/SSE 传输 |
-| v0.5.0 | 连接池监控、慢查询日志 |
+| v0.1.0 | MySQL + Redis + 鍩虹瀹夊叏灞傦紝stdio 浼犺緭 |
+| v0.2.0 | OceanBase + 閲戜粨鏀寔锛屽璁℃棩蹇?|
+| v0.3.0 | 杈炬ⅵ DM8 鏀寔 |
+| v0.4.0 | HTTP/SSE 浼犺緭 |
+| v0.5.0 | 杩炴帴姹犵洃鎺с€佹參鏌ヨ鏃ュ織 |

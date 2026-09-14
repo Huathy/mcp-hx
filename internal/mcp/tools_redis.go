@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yourname/mcp-dbx/internal/driver"
-	"github.com/yourname/mcp-dbx/internal/safety"
+	"github.com/yourname/mcp-x/internal/driver"
+	"github.com/yourname/mcp-x/internal/safety"
 )
 
 func (s *Server) registerRedisTools() {

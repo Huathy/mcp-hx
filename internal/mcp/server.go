@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yourname/mcp-dbx/internal/config"
-	"github.com/yourname/mcp-dbx/internal/datasource"
+	"github.com/yourname/mcp-x/internal/config"
+	"github.com/yourname/mcp-x/internal/datasource"
 )
 
 type Server struct {
-	server   *mcp.Server
-	mgr      *datasource.Manager
-	logger   *slog.Logger
-	cfg      *config.Config
+	server *mcp.Server
+	mgr    *datasource.Manager
+	logger *slog.Logger
+	cfg    *config.Config
 }
 
 func NewServer(name, version string, mgr *datasource.Manager, cfg *config.Config, logger *slog.Logger) (*Server, error) {
@@ -48,6 +48,8 @@ func (s *Server) registerTools() error {
 
 	s.registerSQLTools()
 	s.registerRedisTools()
+	s.registerDocTools()
+	s.registerObjectTools()
 
 	return nil
 }

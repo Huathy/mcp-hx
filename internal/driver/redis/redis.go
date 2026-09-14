@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/yourname/mcp-dbx/internal/driver"
+	"github.com/yourname/mcp-x/internal/driver"
 )
 
 type RedisDriver struct {
 	client redis.UniversalClient
 }
 
-func (d *RedisDriver) Name() string                   { return "redis" }
-func (d *RedisDriver) Type() driver.DriverType          { return driver.DriverTypeNoSQL }
+func (d *RedisDriver) Name() string            { return "redis" }
+func (d *RedisDriver) Type() driver.DriverType { return driver.DriverTypeNoSQL }
 
 func (d *RedisDriver) Connect(ctx context.Context, cfg driver.ConnConfig) error {
 	switch cfg.Mode {

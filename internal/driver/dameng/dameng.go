@@ -1,4 +1,4 @@
-package mysql
+package dameng
 
 import (
 	"context"
@@ -7,21 +7,21 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/ganl/go-dm"
 	"github.com/yourname/mcp-x/internal/driver"
 )
 
-type MySQLDriver struct {
+type DamengDriver struct {
 	db *sql.DB
 }
 
-func (d *MySQLDriver) Name() string            { return "mysql" }
-func (d *MySQLDriver) Type() driver.DriverType { return driver.DriverTypeSQL }
+func (d *DamengDriver) Name() string            { return "dameng" }
+func (d *DamengDriver) Type() driver.DriverType { return driver.DriverTypeSQL }
 
-func (d *MySQLDriver) Connect(ctx context.Context, cfg driver.ConnConfig) error {
-	db, err := sql.Open("mysql", cfg.DSN)
+func (d *DamengDriver) Connect(ctx context.Context, cfg driver.ConnConfig) error {
+	db, err := sql.Open("dm", cfg.DSN)
 	if err != nil {
-		return fmt.Errorf("mysql open: %w", err)
+		return fmt.Errorf("dameng open: %w", err)
 	}
 	if cfg.MaxOpenConns > 0 {
 		db.SetMaxOpenConns(cfg.MaxOpenConns)
@@ -34,13 +34,13 @@ func (d *MySQLDriver) Connect(ctx context.Context, cfg driver.ConnConfig) error 
 	}
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
-		return fmt.Errorf("mysql ping: %w", err)
+		return fmt.Errorf("dameng ping: %w", err)
 	}
 	d.db = db
 	return nil
 }
 
-func (d *MySQLDriver) Query(ctx context.Context, sqlStr string, args []any) (*driver.QueryResult, error) {
+func (d *DamengDriver) Query(ctx context.Context, sqlStr string, args []any) (*driver.QueryResult, error) {
 	rows, err := d.db.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
@@ -82,25 +82,23 @@ func (d *MySQLDriver) Query(ctx context.Context, sqlStr string, args []any) (*dr
 	}, nil
 }
 
-func (d *MySQLDriver) Execute(ctx context.Context, sqlStr string, args []any) (*driver.ExecResult, error) {
+func (d *DamengDriver) Execute(ctx context.Context, sqlStr string, args []any) (*driver.ExecResult, error) {
 	start := time.Now()
 	res, err := d.db.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, fmt.Errorf("exec: %w", err)
 	}
 	affected, _ := res.RowsAffected()
-	lastID, _ := res.LastInsertId()
 	return &driver.ExecResult{
 		AffectedRows: affected,
-		LastInsertID: lastID,
 		Duration:     time.Since(start).Milliseconds(),
 	}, nil
 }
 
-func (d *MySQLDriver) ListTables(ctx context.Context) ([]driver.TableInfo, error) {
-	rows, err := d.db.QueryContext(ctx, "SHOW TABLES")
+func (d *DamengDriver) ListTables(ctx context.Context) ([]driver.TableInfo, error) {
+	rows, err := d.db.QueryContext(ctx, "SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME")
 	if err != nil {
-		return nil, fmt.Errorf("show tables: %w", err)
+		return nil, fmt.Errorf("list tables: %w", err)
 	}
 	defer rows.Close()
 
@@ -115,8 +113,10 @@ func (d *MySQLDriver) ListTables(ctx context.Context) ([]driver.TableInfo, error
 	return tables, rows.Err()
 }
 
-func (d *MySQLDriver) DescribeTable(ctx context.Context, table string) (*driver.TableSchema, error) {
-	rows, err := d.db.QueryContext(ctx, "DESCRIBE "+quoteIdent(table))
+func (d *DamengDriver) DescribeTable(ctx context.Context, table string) (*driver.TableSchema, error) {
+	rows, err := d.db.QueryContext(ctx,
+		"SELECT COLUMN_NAME, DATA_TYPE, NULLABLE, DATA_DEFAULT FROM USER_TAB_COLUMNS WHERE TABLE_NAME = ? ORDER BY COLUMN_ID",
+		strings.ToUpper(table))
 	if err != nil {
 		return nil, fmt.Errorf("describe: %w", err)
 	}
@@ -124,42 +124,49 @@ func (d *MySQLDriver) DescribeTable(ctx context.Context, table string) (*driver.
 
 	schema := &driver.TableSchema{Table: table}
 	for rows.Next() {
-		var field, typ, nullness, keyStr, defStr, extra string
-		if err := rows.Scan(&field, &typ, &nullness, &keyStr, &defStr, &extra); err != nil {
+		var field, typ, nullable sql.NullString
+		var defVal sql.NullString
+		if err := rows.Scan(&field, &typ, &nullable, &defVal); err != nil {
 			return nil, fmt.Errorf("describe scan: %w", err)
 		}
+		nullStr := "NO"
+		if nullable.Valid && nullable.String == "Y" {
+			nullStr = "YES"
+		}
 		schema.Columns = append(schema.Columns, driver.ColumnInfo{
-			Name:     field,
-			Type:     typ,
-			Nullable: nullness,
-			Key:      keyStr,
-			Default:  defStr,
+			Name:     field.String,
+			Type:     typ.String,
+			Nullable: nullStr,
+			Default:  defVal.String,
 		})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	idxRows, err := d.db.QueryContext(ctx, fmt.Sprintf("SHOW INDEX FROM %s", quoteIdent(table)))
+	idxRows, err := d.db.QueryContext(ctx,
+		"SELECT INDEX_NAME, COLUMN_NAME, UNIQUENESS FROM USER_IND_COLUMNS JOIN USER_INDEXES USING(INDEX_NAME) WHERE TABLE_NAME = ? ORDER BY INDEX_NAME, COLUMN_POSITION",
+		strings.ToUpper(table))
 	if err == nil {
 		defer idxRows.Close()
 		idxMap := make(map[string]*driver.IndexInfo)
 		var idxOrder []string
 		for idxRows.Next() {
-			var tableNonEq, nonUniqueStr, keyName string
-			var seqInIndex int
-			var colName sql.NullString
-			if err := idxRows.Scan(&tableNonEq, &nonUniqueStr, &keyName, &seqInIndex, &colName, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+			var idxName, colName, uniqueness sql.NullString
+			if err := idxRows.Scan(&idxName, &colName, &uniqueness); err != nil {
 				break
 			}
-			idx, ok := idxMap[keyName]
+			if !idxName.Valid {
+				continue
+			}
+			idx, ok := idxMap[idxName.String]
 			if !ok {
 				idx = &driver.IndexInfo{
-					Name:   keyName,
-					Unique: nonUniqueStr == "0",
+					Name:   idxName.String,
+					Unique: uniqueness.Valid && uniqueness.String == "UNIQUE",
 				}
-				idxMap[keyName] = idx
-				idxOrder = append(idxOrder, keyName)
+				idxMap[idxName.String] = idx
+				idxOrder = append(idxOrder, idxName.String)
 			}
 			if colName.Valid {
 				idx.Columns = append(idx.Columns, colName.String)
@@ -173,21 +180,17 @@ func (d *MySQLDriver) DescribeTable(ctx context.Context, table string) (*driver.
 	return schema, nil
 }
 
-func (d *MySQLDriver) Ping(ctx context.Context) error {
+func (d *DamengDriver) Ping(ctx context.Context) error {
 	return d.db.PingContext(ctx)
 }
 
-func (d *MySQLDriver) Close() error {
+func (d *DamengDriver) Close() error {
 	if d.db == nil {
 		return nil
 	}
 	return d.db.Close()
 }
 
-func quoteIdent(name string) string {
-	return "`" + strings.ReplaceAll(name, "`", "``") + "`"
-}
-
 func init() {
-	driver.Register("mysql", func() driver.AnyDriver { return &MySQLDriver{} })
+	driver.Register("dameng", func() driver.AnyDriver { return &DamengDriver{} })
 }

@@ -1,5 +1,5 @@
 server:
-  name: "mcp-dbx"
+  name: "mcp-x"
   version: "0.1.0"
 
 safety:

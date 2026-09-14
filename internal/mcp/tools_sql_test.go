@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yourname/mcp-dbx/internal/config"
-	"github.com/yourname/mcp-dbx/internal/driver"
-	"github.com/yourname/mcp-dbx/internal/safety"
+	"github.com/yourname/mcp-x/internal/config"
+	"github.com/yourname/mcp-x/internal/driver"
+	"github.com/yourname/mcp-x/internal/safety"
 )
 
 func newTestSafety(mode string) *safety.Checker {

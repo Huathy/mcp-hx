@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yourname/mcp-dbx/internal/driver"
-	"github.com/yourname/mcp-dbx/internal/safety"
+	"github.com/yourname/mcp-x/internal/driver"
+	"github.com/yourname/mcp-x/internal/safety"
 )
 
 func (s *Server) registerSQLTools() {
@@ -33,10 +33,10 @@ func (s *Server) registerSQLTools() {
 }
 
 type dbQueryInput struct {
-	DataSource string   `json:"datasource" jsonschema:"the name of the data source"`
-	SQL       string   `json:"sql" jsonschema:"SQL SELECT query. Supports parameterized placeholders (?)"`
-	Args      []any    `json:"args,omitempty" jsonschema:"query parameters for placeholders"`
-	Limit     int      `json:"limit,omitempty" jsonschema:"max rows to return (default 1000)"`
+	DataSource string `json:"datasource" jsonschema:"the name of the data source"`
+	SQL        string `json:"sql" jsonschema:"SQL SELECT query. Supports parameterized placeholders (?)"`
+	Args       []any  `json:"args,omitempty" jsonschema:"query parameters for placeholders"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"max rows to return (default 1000)"`
 }
 
 type queryOutput struct {
@@ -233,4 +233,3 @@ func formatQueryResult(r *driver.QueryResult) string {
 	}
 	return sb.String()
 }
-

@@ -1,10 +1,10 @@
 .PHONY: build test run clean
 
 build:
-	go build -o bin/mcp-dbx ./cmd/mcp-dbx
+	go build -o bin/mcp-x ./cmd/mcp-x
 
 run: build
-	./bin/mcp-dbx --config ./.kilo/mcp_x.yaml
+	./bin/mcp-x --config ./.kilo/mcp-x.yaml
 
 test:
 	go test ./... -v
