@@ -3,6 +3,9 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/yourname/mcp-x/internal/driver"
@@ -25,7 +28,7 @@ func (d *MongoDriver) Connect(ctx context.Context, cfg driver.ConnConfig) error 
 	if uri == "" && len(cfg.Addrs) > 0 {
 		uri = "mongodb://"
 		if cfg.Username != "" {
-			uri += fmt.Sprintf("%s:%s@", cfg.Username, cfg.Password)
+			uri += url.PathEscape(cfg.Username) + ":" + url.PathEscape(cfg.Password) + "@"
 		}
 		uri += joinAddrs(cfg.Addrs)
 		uri += "/" + cfg.Database
@@ -95,7 +98,7 @@ func (d *MongoDriver) Keys(ctx context.Context, pattern string, limit int) ([]st
 	}
 	filter := bson.M{}
 	if pattern != "" && pattern != "*" {
-		filter["_id"] = bson.M{"$regex": pattern}
+		filter["_id"] = bson.M{"$regex": globToRegex(pattern)}
 	}
 	cursor, err := d.coll().Find(ctx, filter, options.Find().SetLimit(int64(limit)))
 	if err != nil {
@@ -199,6 +202,23 @@ func joinAddrs(addrs []string) string {
 		result += a
 	}
 	return result
+}
+
+func globToRegex(pattern string) string {
+	var sb strings.Builder
+	sb.WriteString("^")
+	for _, r := range pattern {
+		switch r {
+		case '*':
+			sb.WriteString(".*")
+		case '?':
+			sb.WriteString(".")
+		default:
+			sb.WriteString(regexp.QuoteMeta(string(r)))
+		}
+	}
+	sb.WriteString("$")
+	return sb.String()
 }
 
 func init() {

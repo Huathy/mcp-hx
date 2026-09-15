@@ -67,15 +67,21 @@ func (d *ESDriver) Search(ctx context.Context, index, query string, limit int) (
 	if index == "" {
 		index = d.index
 	}
-	q := query
-	if q == "" {
-		q = `{"query":{"match_all":{}}}`
+	var queryObj any
+	if query == "" {
+		queryObj = map[string]any{"match_all": map[string]any{}}
+	} else if err := json.Unmarshal([]byte(query), &queryObj); err != nil {
+		return nil, fmt.Errorf("es query not valid JSON: %w", err)
 	}
-	body := fmt.Sprintf(`{"size":%d,"query":%s}`, limit, q)
+	bodyObj := map[string]any{"size": limit, "query": queryObj}
+	bodyBytes, err := json.Marshal(bodyObj)
+	if err != nil {
+		return nil, fmt.Errorf("es marshal body: %w", err)
+	}
 	res, err := d.client.Search(
 		d.client.Search.WithContext(ctx),
 		d.client.Search.WithIndex(index),
-		d.client.Search.WithBody(bytes.NewReader([]byte(body))),
+		d.client.Search.WithBody(bytes.NewReader(bodyBytes)),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("es search: %w", err)
@@ -135,7 +141,15 @@ func (d *ESDriver) IndexDoc(ctx context.Context, index, id, body string) error {
 	if index == "" {
 		index = d.index
 	}
-	res, err := d.client.Index(index, bytes.NewReader([]byte(body)),
+	var doc any
+	if err := json.Unmarshal([]byte(body), &doc); err != nil {
+		return fmt.Errorf("es doc body not valid JSON: %w", err)
+	}
+	cleanBytes, err := json.Marshal(doc)
+	if err != nil {
+		return fmt.Errorf("es remarshal body: %w", err)
+	}
+	res, err := d.client.Index(index, bytes.NewReader(cleanBytes),
 		d.client.Index.WithContext(ctx),
 		d.client.Index.WithDocumentID(id),
 		d.client.Index.WithRefresh("true"),

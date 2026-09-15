@@ -23,10 +23,64 @@ import (
 	_ "github.com/yourname/mcp-x/internal/driver/redis"
 )
 
+const helpText = `mcp-x: 通用数据库 MCP Server
+让 AI 编程助手（kilocode / cursor / claude code 等）通过 MCP 协议安全操作数据库。
+
+用法:
+  mcp-x --config <配置文件路径>
+  mcp-x -config <配置文件路径>
+  mcp-x                 # 自动查找配置（见下方查找顺序）
+
+参数:
+  --config <path>       指定 YAML 配置文件路径
+  -h, --help            显示本帮助信息
+
+配置文件查找顺序（未传 --config 时）:
+  1. ./.kilo/mcp-x.yaml          （项目级，推荐）
+  2. ./.kilo/mcp-x.yml
+  3. ~/.config/mcp_x/config.yaml（全局级，所有项目共享）
+  4. ~/.config/mcp_x/config.yml
+
+示例配置: examples/mcp-x.yaml.example
+
+支持的数据源 Driver:
+  关系型: mysql, postgres, dameng, kingbase
+  NoSQL : redis, mongodb, elasticsearch
+  对象  : minio
+
+安全模式（safety.mode）:
+  read-only   只允许 SELECT / 读操作（默认推荐）
+  read-write  允许 INSERT/UPDATE/DELETE，危险关键词仍拦截
+  危险关键词拦截: DROP / TRUNCATE / GRANT / REVOKE / ALTER / SHUTDOWN
+  危险命令拦截  : FLUSHALL / FLUSHDB / CONFIG / KEYS 等
+  DELETE/UPDATE 缺 WHERE 自动拦截；max_rows + 查询超时保护
+
+工具一览（共 22 个，按数据源类型启用）:
+  通用: db_list, db_ping
+  SQL : db_query, db_execute, db_tables, db_schema
+  Redis: redis_get/set/del/keys/type/ttl
+  ES  : doc_list_indices, doc_search, doc_get, doc_index, doc_delete
+  MinIO: obj_list_buckets, obj_list, obj_get, obj_put, obj_delete
+
+更多信息: https://github.com/yourname/mcp-x
+`
+
 func main() {
-	var configPath string
+	var (
+		configPath string
+		showHelp   bool
+	)
 	flag.StringVar(&configPath, "config", "", "path to config file (default: ./.kilo/mcp-x.yaml)")
+	flag.BoolVar(&showHelp, "help", false, "show help and exit")
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, helpText)
+	}
 	flag.Parse()
+
+	if showHelp {
+		fmt.Print(helpText)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
@@ -44,6 +98,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "  1. 项目级: ./.kilo/mcp-x.yaml  (推荐，仅当前项目)")
 		fmt.Fprintln(os.Stderr, "  2. 全局级: ~/.config/mcp_x/config.yaml (所有项目共享)")
 		fmt.Fprintln(os.Stderr, "\n示例配置见: examples/mcp-x.yaml.example")
+		fmt.Fprintln(os.Stderr, "\n完整用法: mcp-x --help")
 		os.Exit(1)
 	}
 

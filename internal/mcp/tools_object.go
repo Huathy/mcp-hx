@@ -10,6 +10,26 @@ import (
 	"github.com/yourname/mcp-x/internal/safety"
 )
 
+func (s *Server) checkBucketKey(dsName, bucket, key string, requireBucket bool) error {
+	for _, dc := range s.cfg.DataSources {
+		if dc.Name != dsName {
+			continue
+		}
+		if dc.Bucket == "" {
+			if requireBucket {
+				return fmt.Errorf("data source %s has no configured bucket; set 'bucket' in config before write operations", dsName)
+			}
+		} else if bucket != dc.Bucket {
+			return fmt.Errorf("bucket %q not allowed (configured: %q)", bucket, dc.Bucket)
+		}
+		break
+	}
+	if strings.Contains(key, "..") {
+		return fmt.Errorf("object key must not contain '..'")
+	}
+	return nil
+}
+
 func (s *Server) registerObjectTools() {
 	mcp.AddTool(s.server, &mcp.Tool{
 		Name:        "obj_list_buckets",
@@ -128,6 +148,9 @@ func (s *Server) handleObjGet(ctx context.Context, req *mcp.CallToolRequest, in 
 	if err != nil {
 		return nil, objGetOutput{}, err
 	}
+	if err := s.checkBucketKey(in.DataSource, in.Bucket, in.Key, false); err != nil {
+		return nil, objGetOutput{}, err
+	}
 	chk := safety.New(s.cfg.EffectiveSafety(in.DataSource))
 	getCtx, cancel := chk.WrapContext(ctx)
 	defer cancel()
@@ -157,6 +180,9 @@ func (s *Server) handleObjPut(ctx context.Context, req *mcp.CallToolRequest, in 
 	if err != nil {
 		return nil, objPutOutput{}, err
 	}
+	if err := s.checkBucketKey(in.DataSource, in.Bucket, in.Key, true); err != nil {
+		return nil, objPutOutput{}, err
+	}
 	chk := safety.New(s.cfg.EffectiveSafety(in.DataSource))
 	if err := chk.CheckWrite(); err != nil {
 		return nil, objPutOutput{}, err
@@ -182,6 +208,9 @@ type objDeleteOutput struct {
 func (s *Server) handleObjDelete(ctx context.Context, req *mcp.CallToolRequest, in objDeleteInput) (*mcp.CallToolResult, objDeleteOutput, error) {
 	d, err := s.getObjectDriver(in.DataSource)
 	if err != nil {
+		return nil, objDeleteOutput{}, err
+	}
+	if err := s.checkBucketKey(in.DataSource, in.Bucket, in.Key, true); err != nil {
 		return nil, objDeleteOutput{}, err
 	}
 	chk := safety.New(s.cfg.EffectiveSafety(in.DataSource))

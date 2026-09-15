@@ -90,12 +90,14 @@ func (d *MinIODriver) GetObject(ctx context.Context, bucket, key string) (string
 		return "", fmt.Errorf("minio get: %w", err)
 	}
 	defer obj.Close()
-	data, err := io.ReadAll(obj)
+	data, err := io.ReadAll(io.LimitReader(obj, maxObjectBytes))
 	if err != nil {
 		return "", fmt.Errorf("minio read: %w", err)
 	}
 	return string(data), nil
 }
+
+const maxObjectBytes = 1 << 20 // 1MB ponytail: raise when larger reads needed
 
 func (d *MinIODriver) PutObject(ctx context.Context, bucket, key, contentType string, body []byte) error {
 	if contentType == "" {

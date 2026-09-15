@@ -76,7 +76,7 @@ datasources:
     bucket: "documents"
     pool_size: 10
     safety:
-      mode: "read-write"
+      mode: "read-only"
 
   - name: "main-es"
     driver: "elasticsearch"
@@ -86,13 +86,13 @@ datasources:
     password: ""
     index_name: "my-index"
     safety:
-      mode: "read-write"
+      mode: "read-only"
 
   - name: "main-minio"
     driver: "minio"
     endpoint: "127.0.0.1:9000"
-    access_key: "minioadmin"
-    secret_key: "minioadmin"
+    access_key: "<your-access-key>"
+    secret_key: "<your-secret-key>"
     use_ssl: false
     region: "us-east-1"
     bucket: "mcp-x"
